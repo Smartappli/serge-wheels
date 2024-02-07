@@ -1,0 +1,179 @@
+name: Build CPU-only Wheels
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag of llama-cpp-python to build: v0.2.14'
+        default: 'v0.2.14'
+        required: true
+        type: string
+      config:
+        description: 'Override configurations to build: key1:item1-1,item1-2;key2:item2-1,item2-2'
+        default: 'Default'
+        required: false
+        type: string
+      exclude:
+        description: 'Exclude build configurations: key1-1:item1-1,key1-2:item1-2;key2-1:item2-1,key2-2:item2-2'
+        default: 'None'
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version tag of llama-cpp-python to build: v0.2.14'
+        default: 'v0.2.14'
+        required: true
+        type: string
+      config:
+        description: 'Configurations to build: key1:item1-1,item1-2;key2:item2-1,item2-2'
+        default: 'Default'
+        required: false
+        type: string
+      exclude:
+        description: 'Exclude build configurations: key1-1:item1-1,key1-2:item1-2;key2-1:item2-1,key2-2:item2-2'
+        default: 'None'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  define_matrix:
+    name: Define Build Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      CONFIGIN: ${{ inputs.config }}
+      EXCLUDEIN: ${{ inputs.exclude }}
+        
+    steps:
+      - name: Define Job Output
+        id: set-matrix
+        run: |
+          $matrix = @{
+              'os' = 'ubuntu-20.04', 'windows-latest'
+              'pyver' = "3.10", "3.11"
+              'avx' = "AVX", "AVX2", "AVX512", "basic"
+          }
+          
+          if ($env:CONFIGIN -ne 'Default') {$env:CONFIGIN.split(';').foreach({$matrix[$_.split(':')[0]] = $_.split(':')[1].split(',')})}
+          
+          if ($env:EXCLUDEIN -ne 'None') {
+              $exclusions = @()
+              $exclusions += $env:EXCLUDEIN.split(';').replace(':','=').replace(',',"`n") | ConvertFrom-StringData
+              $matrix['exclude'] = $exclusions
+          }
+          
+          $matrixOut = ConvertTo-Json $matrix -Compress
+          Write-Output ('matrix=' + $matrixOut) >> $env:GITHUB_OUTPUT
+          
+  build_wheels:
+    name: ${{ matrix.os }} ${{ matrix.pyver }} CPU ${{ matrix.avx }}
+    needs: define_matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix: ${{ fromJSON(needs.define_matrix.outputs.matrix) }}
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      AVXVER: ${{ matrix.avx }}
+      PCKGVER: ${{ inputs.version }}
+
+    steps:
+      - name: ⌛ rate 1
+        shell: pwsh
+        run: |
+          # add random sleep since we run on fixed schedule
+          sleep (get-random -max 1200)
+          
+          # get currently authenticated user rate limit info
+          $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
+      
+          # if we don't have at least 100 requests left, wait until reset
+          if ($rate.remaining -lt 350) {
+              $wait = ($rate.reset - (Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
+              echo "Rate limit remaining is $($rate.remaining), waiting for $($wait) seconds to reset"
+              sleep $wait
+              $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
+              echo "Rate limit has reset to $($rate.remaining) requests"
+          }
+          
+      - uses: actions/checkout@v4
+        with:
+          repository: 'abetlen/llama-cpp-python'
+          ref: ${{ inputs.version }}
+          submodules: 'recursive'
+          
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.pyver }}
+          
+      - name: Install Dependencies
+        run: |
+          python -m pip install build wheel
+          
+      - name: Build Wheel
+        run: |
+          $packageVersion = [version]$env:PCKGVER.TrimStart('v')
+          $env:VERBOSE = '1'
+          if ($env:AVXVER -eq 'AVX') {$env:CMAKE_ARGS = '-DLLAMA_AVX2=off -DLLAMA_FMA=off -DLLAMA_F16C=off'}
+          if ($env:AVXVER -eq 'AVX512') {$env:CMAKE_ARGS = '-DLLAMA_AVX512=on'}
+          if ($env:AVXVER -eq 'basic') {$env:CMAKE_ARGS = '-DLLAMA_AVX=off -DLLAMA_AVX2=off -DLLAMA_FMA=off -DLLAMA_F16C=off'}
+          if ($packageVersion -gt [version]'0.2.13') {$env:CMAKE_ARGS = "-DLLAMA_NATIVE=off $env:CMAKE_ARGS"}
+          $buildtag = "+cpu$env:AVXVER"
+          if ($packageVersion -lt [version]'0.2.0') {
+            $env:FORCE_CMAKE = '1'
+            python -m build --wheel -C--build-option=egg_info "-C--build-option=--tag-build=$buildtag"
+          } else {
+            $initpath = Join-Path '.' 'llama_cpp' '__init__.py' -resolve
+            $initcontent = Get-Content $initpath -raw
+            $regexstr = '(?s)(?<=__version__ \= ")\d+(?:\.\d+)*(?=")'
+            $regexmatch = [Regex]::Matches($initcontent,$regexstr)
+            if (!($regexmatch[0].Success)) {throw '__init__.py parsing failed'}
+            $newinit = $regexmatch[0].Result(('$`' + '$&' + $buildtag + '$'''))
+            New-Item $initpath -itemType File -value $newinit -force
+            python -m build --wheel
+          }
+
+      - name: ⌛ rate 2
+        shell: pwsh
+        run: |
+          # add random sleep since we run on fixed schedule
+          sleep (get-random -max 1200)
+          
+          # get currently authenticated user rate limit info
+          $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
+      
+          # if we don't have at least 100 requests left, wait until reset
+          if ($rate.remaining -lt 350) {
+              $wait = ($rate.reset - (Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
+              echo "Rate limit remaining is $($rate.remaining), waiting for $($wait) seconds to reset"
+              sleep $wait
+              $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
+              echo "Rate limit has reset to $($rate.remaining) requests"
+          }         
+          
+      - name: Upload files to a GitHub release
+        id: upload-release
+        uses: svenstaro/upload-release-action@2.7.0
+        continue-on-error: true
+        with:
+          file: ./dist/*.whl
+          tag: 'cpu'
+          file_glob: true
+          make_latest: false
+          overwrite: true
+        
+      - uses: actions/upload-artifact@v3
+        if: steps.upload-release.outcome == 'failure'
+        with:
+          name: cpu
+          path: ./dist/*.whl

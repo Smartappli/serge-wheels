@@ -283,17 +283,6 @@ jobs:
         continue-on-error: true
         with:
           file: ./dist/*.whl
-          tag: 'cpu'
-          file_glob: true
-          make_latest: false
-          overwrite: true
-          
-      - name: Upload files to a GitHub release
-        id: upload-release
-        uses: svenstaro/upload-release-action@2.7.0
-        continue-on-error: true
-        with:
-          file: ./dist/*.whl
           tag: rocm
           file_glob: true
           make_latest: false

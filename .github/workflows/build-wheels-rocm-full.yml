@@ -95,11 +95,30 @@ jobs:
       run:
         shell: pwsh
     env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PCKGVER: ${{ inputs.version }}
       ROCM_VERSION: ${{ matrix.rocm }}
       AVXVER: ${{ matrix.avx }}
 
     steps:
+      - name: ⌛ rate 1
+        shell: pwsh
+        run: |
+          # add random sleep since we run on fixed schedule
+          sleep (get-random -max 1200)
+          
+          # get currently authenticated user rate limit info
+          $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
+      
+          # if we don't have at least 100 requests left, wait until reset
+          if ($rate.remaining -lt 350) {
+              $wait = ($rate.reset - (Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
+              echo "Rate limit remaining is $($rate.remaining), waiting for $($wait) seconds to reset"
+              sleep $wait
+              $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
+              echo "Rate limit has reset to $($rate.remaining) requests"
+          }
+          
       - name: Free Disk Space
         if: runner.os == 'Linux'
         uses: jlumbroso/free-disk-space@v1.2.0
@@ -239,6 +258,35 @@ jobs:
             New-Item $initpath -itemType File -value $newinit -force
             python -m build --wheel
           }
+
+      - name: ⌛ rate 2
+        shell: pwsh
+        run: |
+          # add random sleep since we run on fixed schedule
+          sleep (get-random -max 1200)
+          
+          # get currently authenticated user rate limit info
+          $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
+      
+          # if we don't have at least 100 requests left, wait until reset
+          if ($rate.remaining -lt 350) {
+              $wait = ($rate.reset - (Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
+              echo "Rate limit remaining is $($rate.remaining), waiting for $($wait) seconds to reset"
+              sleep $wait
+              $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
+              echo "Rate limit has reset to $($rate.remaining) requests"
+          }         
+          
+      - name: Upload files to a GitHub release
+        id: upload-release
+        uses: svenstaro/upload-release-action@2.7.0
+        continue-on-error: true
+        with:
+          file: ./dist/*.whl
+          tag: 'cpu'
+          file_glob: true
+          make_latest: false
+          overwrite: true
           
       - name: Upload files to a GitHub release
         id: upload-release

@@ -27,7 +27,7 @@ jobs:
         id: compare_release
         run: |
           # Read the release info from the downloaded artifact
-          PREVIOUS_RELEASE=$(cat ./llama-cpp-python-release-info.txt 2> /dev/null || echo "NONE")
+          PREVIOUS_RELEASE=$(cat llama-cpp-python-release-info.txt 2> /dev/null || echo "NONE")
           echo "previous release: $PREVIOUS_RELEASE"
 
           # Compare the fetched release tag with the previous release tag
@@ -51,11 +51,12 @@ jobs:
       - name: Store artifacts
         run: |
           # Store the newly fetched release version in a file
-          echo "${{ steps.get_release.outputs.RELEASE_TAG }}" > ./llama-cpp-python-release-info.txt
+          echo "${{ steps.get_release.outputs.RELEASE_TAG }}" > llama-cpp-python-release-info.txt
           echo "Saved ${{ steps.get_release.outputs.RELEASE_TAG }} to llama-cpp-python-release-info.txt"
 
       - name: Upload new artifacts
         uses: actions/upload-artifact@v4
         with:
-          path: ./llama-cpp-python-release-info.txt
+          name: llama-cpp-python-release-info
+          path: llama-cpp-python-release-info.txt
           overwrite: true

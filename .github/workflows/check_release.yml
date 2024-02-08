@@ -42,7 +42,7 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: build-wheels-full-release.yml
-          inputs: '{ "version": "${{ steps.get_release.outputs.RELEASE_TAG }}"}'
+          inputs: '{ "version": { "default": "${{ steps.get_release.outputs.RELEASE_TAG }}}"}'
       
       - name: Store artifacts
         run: |

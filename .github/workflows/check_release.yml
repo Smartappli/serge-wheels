@@ -39,7 +39,7 @@ jobs:
 
       - name: Call workflow to build code
         if: steps.compare_release.outputs.release_changed == 'true'
-        uses: benc-uk/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@v1.2.2
         with:
           workflow: build-wheels-full-release.yml
           inputs: '{ "version": { "default": "${{ steps.get_release.outputs.RELEASE_TAG }}" } }'

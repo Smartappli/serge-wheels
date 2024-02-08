@@ -41,7 +41,7 @@ jobs:
         if: steps.compare_release.outputs.release_changed == 'true'
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: build-wheels-full-release.yml
+          workflow: build-wheels-macos.yml
           inputs: '{ "version": { "default": "${{ steps.get_release.outputs.RELEASE_TAG }}"}}'
       
       - name: Store artifacts

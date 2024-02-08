@@ -17,7 +17,7 @@ jobs:
         id: get_release
         run: |
           # Fetch release information and extract the release tag
-          RELEASE_TAG=$(curl -s https://api.github.com/repos/abetlen/llama-cpp-python/releases/latest | jq -r '.tag_name')
+          RELEASE_TAG=$(curl -s https://api.github.com/repos/abetlen/llama-cpp-python/releases/latest | jq -r 'tag_name')
           echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
           echo "latest release: $RELEASE_TAG"
 

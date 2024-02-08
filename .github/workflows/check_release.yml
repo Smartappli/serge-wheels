@@ -57,5 +57,5 @@ jobs:
       - name: Upload new artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: llama-cpp-python-info
-          path: llama-cpp-python-info
+          name: llama-cpp-python-release-info
+          path: llama-cpp-python-release-info

@@ -5,7 +5,7 @@ on:
     inputs:
       version:
         description: 'Version tag of llama-cpp-python to build: v0.2.38'
-        default: 'v0.2.39'
+        default: 'v0.2.38'
         required: true
         type: string
 

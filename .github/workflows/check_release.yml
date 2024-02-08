@@ -56,6 +56,8 @@ jobs:
 
       - name: Upload new file
         if: steps.compare_release.outputs.release_changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"

@@ -14,29 +14,31 @@ permissions:
   
 jobs:
   run_main:
-    name: Build ${{ inputs.version }} CUDA Wheels
-    uses: ./.github/workflows/build-wheels.yml
-    with:
-      version: ${{ inputs.version }}
-      cpu: '0'
-           
-  run_cpu:
     name: Build CPU-only Wheels
-    needs: run_main
     uses: ./.github/workflows/build-wheels-cpu.yml
     with:
       version: ${{ inputs.version }}
       
   run_macos:
     name: Build MacOS Metal Wheels
-    needs: run_cpu
+    needs: run_main
     uses: ./.github/workflows/build-wheels-macos.yml
     with:
       version: ${{ inputs.version }}
       
+  run_cuda:
+    name: Build ${{ inputs.version }} CUDA Wheels
+    needs: run_macos
+    uses: ./.github/workflows/build-wheels.yml
+    with:
+      version: ${{ inputs.version }}
+      cpu: '0'
+      
   run_rocm:
     name: Build ROCm Wheels
-    needs: run_macos
+    needs: run_cuda
     uses: ./.github/workflows/build-wheels-rocm-full.yml
     with:
       version: ${{ inputs.version }}
+
+

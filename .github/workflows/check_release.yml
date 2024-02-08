@@ -55,6 +55,7 @@ jobs:
           echo "Saved ${{ steps.get_release.outputs.RELEASE_TAG }} to llama-cpp-python-release-info.txt"
 
       - name: Upload new file
+        if: steps.compare_release.outputs.release_changed == 'true'
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"

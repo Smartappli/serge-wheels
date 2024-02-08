@@ -51,11 +51,11 @@ jobs:
       - name: Store artifacts
         run: |
           # Store the newly fetched release version in a file
-          echo "${{ steps.get_release.outputs.RELEASE_TAG }}" > llama-cpp-python-release-info
-          echo "Saved ${{ steps.get_release.outputs.RELEASE_TAG }} to llama-cpp-python-release-info"
+          echo "${{ steps.get_release.outputs.RELEASE_TAG }}" > ./llama-cpp-python-release-info.txt
+          echo "Saved ${{ steps.get_release.outputs.RELEASE_TAG }} to llama-cpp-python-release-info.txt"
 
       - name: Upload new artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: llama-cpp-python-release-info
-          path: ./llama-cpp-python-release-info
+          path: ./llama-cpp-python-release-info.txt

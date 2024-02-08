@@ -46,7 +46,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           workflow: build-wheels-full-release.yml
-          inputs: '{ "version": { "default": "${{ steps.get_release.outputs.RELEASE_TAG }}" } }'
+          inputs: '{ "version": "${{ steps.get_release.outputs.RELEASE_TAG }}"}'
       
       - name: Store artifacts
         run: |

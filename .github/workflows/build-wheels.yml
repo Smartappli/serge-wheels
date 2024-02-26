@@ -129,7 +129,7 @@ jobs:
           python-version: ${{ matrix.pyver }}
         
       - name: Setup Mamba
-        uses: conda-incubator/setup-miniconda@v3.0.1
+        uses: conda-incubator/setup-miniconda@v3.0.2
         with:
           activate-environment: "build"
           python-version: ${{ matrix.pyver }}
@@ -228,7 +228,7 @@ jobs:
           
       - name: Upload files to a GitHub release
         id: upload-release
-        uses: svenstaro/upload-release-action@2.7.0
+        uses: svenstaro/upload-release-action@2.9.0
         continue-on-error: true
         with:
           file: ./dist/*.whl

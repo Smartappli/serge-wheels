@@ -33,10 +33,17 @@ jobs:
     with:
       version: ${{ inputs.version }}
       cpu: '0'
+
+  run_tensorcore:
+    name: Build Tensorcore Wheels
+    needs: run_cuda
+    uses: ./.github/workflows/build-wheels-tensorcores.yml
+    with:
+      version: ${{ inputs.version }} 
       
   run_rocm:
     name: Build ROCm Wheels
-    needs: run_cuda
+    needs: run_tensorcore
     uses: ./.github/workflows/build-wheels-rocm-full.yml
     with:
       version: ${{ inputs.version }}

@@ -40,7 +40,14 @@ jobs:
     uses: ./.github/workflows/build-wheels-tensorcores.yml
     with:
       version: ${{ inputs.version }} 
-      
+
+  run_textgen:
+    name: Build TxtGen Wheels
+    needs: run_cuda
+    uses: ./.github/workflows/build-wheels-oobabooga.yml
+    with:
+      version: ${{ inputs.version }} 
+  
   run_rocm:
     name: Build ROCm Wheels
     needs: run_tensorcore

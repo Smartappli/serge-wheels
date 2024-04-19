@@ -34,16 +34,9 @@ jobs:
       version: ${{ inputs.version }}
       cpu: '0'
 
-  run_tensorcore:
-    name: Build Tensorcore Wheels
-    needs: run_cuda
-    uses: ./.github/workflows/build-wheels-tensorcores.yml
-    with:
-      version: ${{ inputs.version }} 
-
   run_textgen:
     name: Build Text Gen Wheels
-    needs: run_tensorcore
+    needs: run_cuda
     uses: ./.github/workflows/build-wheels-oobabooga.yml
     with:
       version: ${{ inputs.version }} 
@@ -55,4 +48,9 @@ jobs:
     with:
       version: ${{ inputs.version }}
 
-
+  run_tensorcore:
+    name: Build Tensorcore Wheels
+    needs: run_rocm
+    uses: ./.github/workflows/build-wheels-tensorcores.yml
+    with:
+      version: ${{ inputs.version }}

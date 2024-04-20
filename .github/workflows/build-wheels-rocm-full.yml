@@ -59,7 +59,7 @@ jobs:
         run: |
           $matrix = @{
               'os' = 'ubuntu-20.04', 'windows-latest'
-              'pyver' = "3.10", "3.11"
+              'pyver' = "3.10", "3.11", "3.12"
               'rocm' = '5.5.1', '5.6.1', '5.7.1'
               'avx' = "AVX", "AVX2", "basic"
               'rename' = '0', '1'
@@ -288,7 +288,7 @@ jobs:
           make_latest: false
           overwrite: true
         
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v3
         if: steps.upload-release.outcome == 'failure'
         with:
           name: 'rocm-wheels'

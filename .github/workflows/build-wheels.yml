@@ -69,7 +69,7 @@ jobs:
           $matrix = @{
               'os' = 'ubuntu-20.04', 'windows-latest'
               'pyver' = "3.10", "3.11", "3.12"
-              'cuda' = "12.0.1", "12.1.1", "12.2.0"
+              'cuda' = "12.3.2", "12.4.1"
               'releasetag' = "AVX", "wheels", "AVX512", "basic"
           }
           

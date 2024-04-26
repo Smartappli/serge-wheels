@@ -284,20 +284,12 @@ jobs:
               $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
               echo "Rate limit has reset to $($rate.remaining) requests"
           }           
-          
-      - name: Upload files to a GitHub release
-        id: upload-release
-        uses: svenstaro/upload-release-action@2.9.0
-        continue-on-error: true
+
+      - uses: softprops/action-gh-release@v1
         with:
-          file: ./dist/*.whl
-          tag: textgen-webui
-          file_glob: true
-          make_latest: false
-          overwrite: true
-        
-      - uses: actions/upload-artifact@v4
-        if: steps.upload-release.outcome == 'failure'
-        with:
-          name: textgen-webui-wheels
-          path: ./dist/*.whl
+          files: dist/*
+          # Set tag_name to <tag>-cu<cuda_version>
+          tag_name: 'textgen-webui'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  

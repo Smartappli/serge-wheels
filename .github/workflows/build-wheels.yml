@@ -110,7 +110,7 @@ jobs:
           $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
       
           # if we don't have at least 100 requests left, wait until reset
-          if ($rate.remaining -lt 350) {
+          if ($rate.remaining -lt 400) {
               $wait = ($rate.reset - (Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
               echo "Rate limit remaining is $($rate.remaining), waiting for $($wait) seconds to reset"
               sleep $wait
@@ -218,7 +218,7 @@ jobs:
           $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
       
           # if we don't have at least 100 requests left, wait until reset
-          if ($rate.remaining -lt 350) {
+          if ($rate.remaining -lt 400) {
               $wait = ($rate.reset - (Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
               echo "Rate limit remaining is $($rate.remaining), waiting for $($wait) seconds to reset"
               sleep $wait

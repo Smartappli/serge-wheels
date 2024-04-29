@@ -59,7 +59,7 @@ jobs:
           $matrix = @{
               'os' = 'ubuntu-20.04', 'windows-latest'
               'pyver' = "3.10", "3.11", "3.12"
-              'cuda' = "12.0.1", "12.1.1", "12.2.0"
+              'cuda' = "12.0.1", "12.1.1", "12.2.2", "12.3.2", "12.4.1"
               'avxver' = "AVX2", "AVX", "basic"
           }
           
@@ -141,7 +141,7 @@ jobs:
         if: runner.os == 'Windows' && steps.vs-integration-cache.outputs.cache-hit != 'true'
         run: |
           if ($env:CUDAVER -eq '12.1.1') {$x = '12.1.0'} else {$x = $env:CUDAVER}
-          $links = (Invoke-RestMethod 'https://github.com/Jimver/cuda-toolkit/raw/257a101bc5c656053b5dc220126744980ef7f5b8/src/links/windows-links.ts').Trim().split().where({$_ -ne ''})
+          $links = (Invoke-RestMethod 'https://raw.githubusercontent.com/Jimver/cuda-toolkit/master/src/links/windows-links.ts').Trim().split().where({$_ -ne ''})
           for ($i=$q=0;$i -lt $links.count -and $q -lt 2;$i++) {if ($links[$i] -eq "'$x',") {$q++}}
           Invoke-RestMethod $links[$i].Trim("'") -OutFile 'cudainstaller.zip'
           & 'C:\Program Files\7-Zip\7z.exe' e cudainstaller.zip -oMSBuildExtensions -r *\MSBuildExtensions\* > $null

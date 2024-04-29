@@ -274,7 +274,7 @@ jobs:
               echo "Rate limit has reset to $($rate.remaining) requests"
           }         
           
-      - uses: softprops/action-gh-release@v2.0.4
+      - uses: softprops/action-gh-release@v2
         with:
           files: dist/*
           # Set tag_name to <tag>-cu<cuda_version>

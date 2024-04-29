@@ -98,7 +98,7 @@ jobs:
           $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
       
           # if we don't have at least 100 requests left, wait until reset
-          if ($rate.remaining -lt 350) {
+          if ($rate.remaining -lt 400) {
               $wait = ($rate.reset - (Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
               echo "Rate limit remaining is $($rate.remaining), waiting for $($wait) seconds to reset"
               sleep $wait
@@ -153,7 +153,7 @@ jobs:
           $rate = gh api rate_limit | convertfrom-json | select -expandproperty rate
       
           # if we don't have at least 100 requests left, wait until reset
-          if ($rate.remaining -lt 350) {
+          if ($rate.remaining -lt 400) {
               $wait = ($rate.reset - (Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
               echo "Rate limit remaining is $($rate.remaining), waiting for $($wait) seconds to reset"
               sleep $wait
@@ -161,7 +161,7 @@ jobs:
               echo "Rate limit has reset to $($rate.remaining) requests"
           }         
           
-      - uses: softprops/action-gh-release@v2.0.4
+      - uses: softprops/action-gh-release@v2
         with:
           files: dist/*
           # Set tag_name to <tag>-cu<cuda_version>

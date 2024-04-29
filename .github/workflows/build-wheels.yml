@@ -142,7 +142,7 @@ jobs:
       - name: VS Integration Cache
         id: vs-integration-cache
         if: runner.os == 'Windows'
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4
         with:
           path: ./MSBuildExtensions
           key: cuda-${{ matrix.cuda }}-vs-integration
@@ -226,7 +226,7 @@ jobs:
               echo "Rate limit has reset to $($rate.remaining) requests"
           } 
 
-      - uses: softprops/action-gh-release@v2.0.4
+      - uses: softprops/action-gh-release@v2
         with:
           files: dist/*
           # Set tag_name to <tag>-cu<cuda_version>

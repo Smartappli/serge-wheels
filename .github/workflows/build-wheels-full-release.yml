@@ -19,20 +19,12 @@ jobs:
     with:
       version: ${{ inputs.version }}
 
-  run_textgen:
-    name: Build ${{ inputs.version }} Text Gen Wheels
-    needs: run_main
-    uses: ./.github/workflows/build-wheels-oobabooga.yml
-    with:
-      version: ${{ inputs.version }}
-
   run_cuda:
     name: Build ${{ inputs.version }} CUDA Wheels
-    needs: run_textgen
+    needs: run_main
     uses: ./.github/workflows/build-wheels.yml
     with:
       version: ${{ inputs.version }}
-      cpu: '0'
       
   run_macos:
     name: Build ${{ inputs.version }} MacOS Metal Wheels
@@ -41,16 +33,9 @@ jobs:
     with:
       version: ${{ inputs.version }}
 
-  run_tensorcore:
-    name: Build ${{ inputs.version }} Tensorcore Wheels
-    needs: run_macos
-    uses: ./.github/workflows/build-wheels-tensorcores.yml
-    with:
-      version: ${{ inputs.version }}
- 
   run_rocm:
     name: Build ${{ inputs.version }} ROCm Wheels
-    needs: run_tensorcore
+    needs: run_macos
     uses: ./.github/workflows/build-wheels-rocm-full.yml
     with:
       version: ${{ inputs.version }}

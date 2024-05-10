@@ -8,6 +8,11 @@ on:
         default: 'v0.2.14'
         required: true
         type: string
+      cpu:
+        description: 'Build CPU-only wheels as well? 0/1 Does not use config or exclude.'
+        default: '1'
+        required: false
+        type: string
       config:
         description: 'Override configurations to build: key1:item1-1,item1-2;key2:item2-1,item2-2'
         default: 'Default'
@@ -24,6 +29,11 @@ on:
         description: 'Version tag of llama-cpp-python to build: v0.2.14'
         default: 'v0.2.14'
         required: true
+        type: string
+      cpu:
+        description: 'Build CPU-only wheels as well? 0/1 Does not use config or exclude.'
+        default: '1'
+        required: false
         type: string
       config:
         description: 'Configurations to build: key1:item1-1,item1-2;key2:item2-1,item2-2'
@@ -60,7 +70,7 @@ jobs:
               'os' = 'ubuntu-20.04', 'windows-latest'
               'pyver' = "3.10", "3.11", "3.12"
               'cuda' = "12.0.1", "12.1.1", "12.2.2", "12.3.2", "12.4.1"
-              'releasetag' = "AVX2"
+              'releasetag' = "AVX", "wheels", "AVX512", "basic"
           }
           
           if ($env:CONFIGIN -ne 'Default') {$env:CONFIGIN.split(';').foreach({$matrix[$_.split(':')[0]] = $_.split(':')[1].split(',')})}
@@ -223,3 +233,11 @@ jobs:
           tag_name: ${{ matrix.releasetag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+  build_cpu:
+    name: Build CPU-only Wheels
+    needs: build_wheels
+    if: inputs.cpu == '1'
+    uses: ./.github/workflows/build-wheels-cpu.yml
+    with:
+      version: ${{ inputs.version }}

@@ -41,7 +41,7 @@ jobs:
 
       - name: Call workflow to build code
         if: steps.compare_release.outputs.release_changed == 'true'
-        uses: benc-uk/workflow-dispatch@v1.2.3
+        uses: benc-uk/workflow-dispatch@v1.2.4
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

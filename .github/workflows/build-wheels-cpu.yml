@@ -106,7 +106,7 @@ jobs:
               echo "Rate limit has reset to $($rate.remaining) requests"
           }
           
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: 'abetlen/llama-cpp-python'
           ref: ${{ inputs.version }}

@@ -1,1 +1,1 @@
-v0.3.31-hip-radeon
+v0.3.32-hip-radeon
